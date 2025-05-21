@@ -1,0 +1,26 @@
+#Ignore the to_do.txt
+to_do.txt
+
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+
+# Build artifacts (optional)
+dist/
+build/
+
+# IDEs
+.vscode/
+.idea/
