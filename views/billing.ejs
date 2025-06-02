@@ -656,18 +656,18 @@
                 <h1 class="billing-title">Billing Information</h1>
             </div>
             
-            <% if(orderDetails.length === 0){ %>
-                <div class="no-billing">
-                    <i class="fas fa-receipt" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                    <h3>No billing history found</h3>
-                    <p>You haven't made any payments yet. Upgrade your plan to get started.</p>
-                </div>
-            <% }else if(userData.role === 'ADMIN'){ %>
+            <% if(userData.role === 'ADMIN'){ %>
                 <!--Admin => You are the owner!-->
                 <div class="no-billing">
                     <i class="fa-solid fa-crown" style="font-size: 3rem; margin-bottom: 1rem;"></i>
                     <h3>You are the owner!</h3>
                     <p>You don't need to make payments!! 😆</p>
+                </div>
+            <% }else if(orderDetails.length === 0){ %>
+                <div class="no-billing">
+                    <i class="fas fa-receipt" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h3>No billing history found</h3>
+                    <p>You haven't made any payments yet. Upgrade your plan to get started.</p>
                 </div>
             <% }else{ %>
                 <% orderDetails.forEach((order, index) => { 
