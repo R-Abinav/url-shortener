@@ -4,6 +4,9 @@ to_do.txt
 # Node modules
 node_modules/
 
+#razorpay
+razorpay/
+
 # Environment variables
 .env
 

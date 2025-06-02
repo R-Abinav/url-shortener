@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener - Sign Up</title>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --success: #4cc9f0;
+            --error: #f72585;
+            
+            /* Dark mode variables */
+            --bg-dark: #212121;
+            --card-dark: #1e1e1e;
+            --text-dark: #e0e0e0;
+            --border-dark: #333;
+            --input-dark: #2d2d2d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body.dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .dark-mode .loading-screen {
+            background-color: var(--bg-dark);
+        }
+        
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid var(--primary);
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+        
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+        
+        .dark-mode .loading-text {
+            color: var(--text-dark);
+        }
+        
+        .container {
+            max-width: 600px; /* Increased from 420px to 600px */
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 3rem 2.5rem; /* Increased side padding */
+            text-align: center;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.8s 0.5s forwards;
+            margin-top: 200px;
+            margin-bottom: 150px;
+        }
+        
+        .dark-mode .container {
+            background: var(--card-dark);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            font-size: 2.2rem; /* Slightly larger heading */
+            margin-bottom: 1.8rem; /* More space below heading */
+            color: var(--primary);
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: var(--light);
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .navbar {
+            background-color: var(--bg-dark);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 40px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .theme-toggle{
+            padding: 16px 32px;
+            background: none !important;
+        }
+
+        
+        /* Form Styles */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem; /* Increased gap between form elements */
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem; /* Increased gap between label and input */
+            text-align: left;
+        }
+        
+        label {
+            font-size: 1rem; /* Slightly larger labels */
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .dark-mode label {
+            color: var(--text-dark);
+        }
+        
+        input {
+            padding: 1.1rem; /* More padding in inputs */
+            border: 2px solid #e9ecef;
+            border-radius: 10px; /* Slightly rounder corners */
+            font-size: 1.05rem; /* Slightly larger font */
+            transition: all 0.3s ease;
+            width: 100%;
+            background: white;
+            color: var(--dark);
+        }
+        
+        .dark-mode input {
+            background: var(--input-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        input::placeholder {
+            color: #adb5bd;
+        }
+        
+        .dark-mode input::placeholder {
+            color: #777;
+        }
+        
+        button {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 1.1rem; /* More padding in button */
+            border-radius: 10px; /* Slightly rounder corners */
+            font-size: 1.05rem; /* Slightly larger font */
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 0.5rem; /* Added space above button */
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .auth-footer {
+            text-align: center;
+            margin-top: 2rem; /* More space above footer */
+            color: #6c757d;
+            font-size: 0.95rem; /* Slightly larger font */
+        }
+        
+        .dark-mode .auth-footer {
+            color: rgba(224, 224, 224, 0.7);
+        }
+        
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .dark-mode .auth-footer a {
+            color: var(--primary-light);
+        }
+        
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Address fields grid */
+        .address-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem; /* Increased gap between grid items */
+        }
+        
+        .address-grid .form-group:last-child {
+            grid-column: span 2;
+        }
+        
+        /* Background Animation */
+        .circles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .circles li {
+            position: absolute;
+            display: block;
+            list-style: none;
+            width: 20px;
+            height: 20px;
+            background: rgba(67, 97, 238, 0.1);
+            animation: animate 25s linear infinite;
+            bottom: -150px;
+            border-radius: 50%;
+        }
+        
+        .dark-mode .circles li {
+            background: rgba(67, 97, 238, 0.05);
+        }
+        
+        .circles li:nth-child(1) {
+            left: 25%;
+            width: 80px;
+            height: 80px;
+            animation-delay: 0s;
+        }
+        
+        .circles li:nth-child(2) {
+            left: 10%;
+            width: 20px;
+            height: 20px;
+            animation-delay: 2s;
+            animation-duration: 12s;
+        }
+        
+        .circles li:nth-child(3) {
+            left: 70%;
+            width: 20px;
+            height: 20px;
+            animation-delay: 4s;
+        }
+        
+        .circles li:nth-child(4) {
+            left: 40%;
+            width: 60px;
+            height: 60px;
+            animation-delay: 0s;
+            animation-duration: 18s;
+        }
+        
+        .circles li:nth-child(5) {
+            left: 65%;
+            width: 20px;
+            height: 20px;
+            animation-delay: 0s;
+        }
+        
+        .circles li:nth-child(6) {
+            left: 75%;
+            width: 110px;
+            height: 110px;
+            animation-delay: 3s;
+        }
+        
+        .circles li:nth-child(7) {
+            left: 35%;
+            width: 150px;
+            height: 150px;
+            animation-delay: 7s;
+        }
+        
+        .circles li:nth-child(8) {
+            left: 50%;
+            width: 25px;
+            height: 25px;
+            animation-delay: 15s;
+            animation-duration: 45s;
+        }
+        
+        .circles li:nth-child(9) {
+            left: 20%;
+            width: 15px;
+            height: 15px;
+            animation-delay: 2s;
+            animation-duration: 35s;
+        }
+        
+        .circles li:nth-child(10) {
+            left: 85%;
+            width: 150px;
+            height: 150px;
+            animation-delay: 0s;
+            animation-duration: 11s;
+        }
+        
+        @keyframes animate {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+                border-radius: 0;
+            }
+            
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+                opacity: 0;
+                border-radius: 50%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1.8rem; /* Slightly more padding on mobile */
+                max-width: 95%; /* Wider on mobile */
+            }
+            
+            h1 {
+                font-size: 2rem; /* Larger heading on mobile */
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                font-size: 1.2rem;
+            }
+            
+            .address-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .address-grid .form-group:last-child {
+                grid-column: span 1;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 650px; /* Even wider on larger screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <div class="loading-text">Loading</div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="/images/logo.png" alt="Logo" class="logo">
+        </div>
+        
+        <div class="nav-center">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Background Animation -->
+    <ul class="circles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Create Account</h1>
+        
+        <form class="auth-form">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input 
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="example@email.com"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input 
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="John Doe"
+                    required
+                />
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Contact Number</label>
+                <input 
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    placeholder="9876543210"
+                    required
+                    title="Enter a valid phone number with country code"
+                />
+            </div>
+            
+            <div class="form-group">
+                <label for="street">Street Address</label>
+                <input 
+                    type="text"
+                    id="street"
+                    name="street"
+                    placeholder="123 Main St"
+                    required
+                />
+            </div>
+            
+            <div class="address-grid">
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input 
+                        type="text"
+                        id="city"
+                        name="city"
+                        placeholder="Mumbai"
+                        required
+                    />
+                </div>
+                
+                <div class="form-group">
+                    <label for="state">State</label>
+                    <input 
+                        type="text"
+                        id="state"
+                        name="state"
+                        placeholder="Maharashtra"
+                        required
+                    />
+                </div>
+                
+                <div class="form-group">
+                    <label for="country">Country</label>
+                    <input 
+                        type="text"
+                        id="country"
+                        name="country"
+                        placeholder="India"
+                        required
+                    />
+                </div>
+                
+                <div class="form-group">
+                    <label for="postcode">Postal Code</label>
+                    <input 
+                        type="text"
+                        id="postcode"
+                        name="postcode"
+                        placeholder="400001"
+                        required
+                        pattern="[0-9]{6}"
+                        title="6-digit postal code"
+                    />
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input 
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="••••••••"
+                    required
+                    minlength="8"
+                />
+            </div>
+
+            <button type="submit" class="auth-button" id="submitButton">
+                Sign Up
+            </button>
+        </form>
+        
+        <div class="auth-footer">
+            Already have an account? <a href="/login">Log in</a>
+        </div>
+    </div>
+
+    <%- include('./components/footer.ejs') %>
+
+    <script>
+        // Loading screen animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            
+            if (!sessionStorage.getItem('loadingShown')) {
+                setTimeout(function() {
+                    loadingScreen.classList.add('hidden');
+                    sessionStorage.setItem('loadingShown', 'true');
+                }, 1500);
+            } else {
+                loadingScreen.classList.add('hidden');
+            }
+        });
+
+        // In your signup page script
+        document.querySelector('.auth-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitButton = document.getElementById('submitButton');
+            submitButton.textContent = 'Creating Account...';
+            submitButton.disabled = true;
+            
+            try {
+                const formData = new FormData(this);
+                const formObject = Object.fromEntries(formData.entries());
+                console.log(JSON.stringify(formObject));
+                const response = await fetch('/signup', {
+                    method: 'POST',
+                    body: JSON.stringify(formObject),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    await Swal.fire({
+                        title: 'Success!',
+                        text: result.message,
+                        icon: 'success',
+                        confirmButtonColor: '#4361ee',
+                        confirmButtonText: 'Go to Login'
+                    });
+                    
+                    window.location.href = '/login';
+                } else {
+                    if(response.status === 409){
+                        await Swal.fire({
+                            title: 'Duplicate Entry',
+                            text: result.error,
+                            icon: 'error',
+                            confirmButtonColor: '#f72585'
+                        });
+                        
+                        // Focus on the duplicate field if possible
+                        const duplicateField = result.error.includes('email') ? 'email' : 
+                                            result.error.includes('phone') ? 'phone' : null;
+                        if (duplicateField) {
+                            document.getElementById(duplicateField).focus();
+                        }
+                    }else{
+                        throw new Error(result.error || 'Registration failed');
+                    }
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#f72585'
+                });
+                
+                submitButton.textContent = 'Sign Up';
+                submitButton.disabled = false;
+            }
+        });
+
+        // Dark mode toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        });
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+
+        // Form submission animation
+        const form = document.querySelector('.auth-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const btn = document.getElementById('submitButton');
+                btn.textContent = 'Creating Account...';
+                btn.style.background = 'linear-gradient(45deg, var(--primary-light), var(--primary))';
+            });
+        }
+    </script>
+</body>
+</html>

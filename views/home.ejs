@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Pop up messages library -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --success: #4cc9f0;
+            --error: #f72585;
+            --bg-dark: #212121;
+            --card-dark: #1e1e1e;
+            --text-dark: #e0e0e0;
+            --border-dark: #333;
+            --input-dark: #2d2d2d;
+            --error: #f72585;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            position: relative;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body.dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--light);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .dark-mode .loading-screen {
+            background-color: var(--bg-dark);
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .dark-mode .loader {
+            border: 5px solid var(--border-dark);
+            border-top: 5px solid var(--primary);
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .dark-mode .loading-text {
+            color: var(--text-dark);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: var(--light);
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .navbar {
+            background-color: var(--bg-dark);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        
+        .theme-toggle{
+            background: none !important;
+        }
+
+        .nav-link {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .dark-mode .nav-link {
+            color: var(--text-dark);
+        }
+
+        .profile-container {
+            position: relative;
+        }
+
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: contain;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-img:hover {
+            transform: scale(1.1);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background-color: var(--light);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            width: 180px;
+            display: none;
+            z-index: 1001;
+            transform-origin: top right;
+        }
+
+        .dark-mode .dropdown-menu {
+            background-color: var(--card-dark);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            color: var(--dark);
+            text-decoration: none;
+            display: block;
+            transition: all 0.2s ease;
+        }
+
+        .dark-mode .dropdown-item {
+            color: var(--text-dark);
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+            padding-left: 1.2rem;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 0.25rem 0;
+        }
+
+        .dark-mode .dropdown-divider {
+            background-color: var(--border-dark);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 2rem;
+            margin-top: 170px;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-content {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+
+        .hero h2 {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--dark);
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        .dark-mode .hero h2 {
+            color: var(--text-dark);
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            color: var(--dark);
+            opacity: 0.9;
+        }
+
+        .dark-mode .hero p {
+            color: var(--text-dark);
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem auto;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .dark-mode .feature-card {
+            background: var(--card-dark);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .dark-mode .feature-card h3 {
+            color: var(--text-dark);
+        }
+
+        .feature-card p {
+            color: var(--dark);
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+
+        .dark-mode .feature-card p {
+            color: var(--text-dark);
+        }
+
+        /* URL Shortener Container */
+        .url-container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 3rem 2rem;
+            text-align: center;
+            margin: 2rem auto;
+        }
+
+        .dark-mode .url-container {
+            background: var(--card-dark);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .dark-mode label {
+            color: var(--text-dark);
+        }
+
+        input {
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            background: white;
+            color: var(--dark);
+        }
+
+        .dark-mode input {
+            background: var(--input-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        button {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Result Container */
+        .result-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .dark-mode .result-container {
+            background-color: var(--input-dark);
+            border: 1px solid var(--border-dark);
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        .result-url {
+            font-size: 1rem;
+            word-break: break-all;
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin-top: 1rem;
+            color: var(--dark);
+        }
+
+        .dark-mode .result-url {
+            background: var(--card-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+
+        /* Sections */
+        .section {
+            padding: 4rem 2rem;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Pricing Cards */
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .pricing-card {
+            border: none;
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .pricing-card {
+            background-color: var(--card-dark);
+        }
+
+        .pricing-card .card-header {
+            padding: 1.5rem;
+            border-bottom: none;
+        }
+
+        .pricing-card .card-body {
+            padding: 2rem;
+        }
+
+        .pricing-card .price {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .dark-mode .text-muted {
+            color: var(--light) !important;
+        }
+
+        .free-plan {
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn {
+            cursor: pointer !important;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 3rem;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .comparison-table {
+            background: var(--card-dark);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .comparison-table th, 
+        .comparison-table td {
+            padding: 1.25rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .dark-mode .comparison-table th,
+        .dark-mode .comparison-table td {
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .comparison-table th {
+            font-weight: 600;
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        .dark-mode .comparison-table th {
+            background-color: rgba(67, 97, 238, 0.2);
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .feature-check {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .feature-missing {
+            color: #6c757d;
+        }
+
+        /* Contact Form */
+        .contact-form {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .dark-mode .contact-form {
+            background: var(--card-dark);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-control {
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-control::placeholder{
+            color: var(--input-dark);
+        }
+
+        .dark-mode .form-control::placeholder {
+            color: white;
+        }
+
+        .dark-mode .form-control {
+            background-color: var(--input-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .dark-mode .stat-card {
+            background: var(--card-dark);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: var(--dark);
+            opacity: 0.8;
+        }
+
+        .dark-mode .stat-label {
+            color: var(--text-dark);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+            
+            .section {
+                max-width: 1000px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .section {
+                max-width: 800px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                margin-top: 60px;
+                padding: 0 1.5rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero h2 {
+                font-size: 1.2rem;
+            }
+            
+            .nav-right {
+                gap: 1rem;
+            }
+            
+            .section {
+                padding: 3rem 1.5rem;
+            }
+            
+            .comparison-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .pricing-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-form {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <div class="loading-text">Loading Home Page</div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="/images/logo.png" alt="Logo" class="logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        </div>
+        
+        <div class="nav-center">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon" style="color: black;"></i>
+            </button>
+        </div>
+        
+        <div class="nav-right">
+            <a class="nav-link" onclick="document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})">Pricing</a>
+            <a class="nav-link" onclick="document.getElementById('contact').scrollIntoView({behavior: 'smooth'})">Contact</a>
+            
+            <div class="profile-container">
+                <img src="/images/default-profile.jpg" alt="Profile" class="profile-img" id="profileImg">
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="/profile" class="dropdown-item">Your Profile</a>
+                    <a href="/profile/analytics" class="dropdown-item">Your Analytics</a>
+                    <% if (userRole === 'ADMIN') { %>
+                        <a href="/admin-analytics" class="dropdown-item">Admin Dashboard</a>
+                    <% } %>
+                    <div class="dropdown-divider"></div>
+                    <a href="/logout" class="dropdown-item">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Shrink It. Share It. Track It.</h1>
+            <h2>Welcome to bibi — your smart link companion</h2>
+            <p>Shorten long URLs into clean, shareable links, monitor real-time click analytics, and understand your audience better.</p>
+
+            <div class="url-container" style="opacity: 0;">
+                <form action="/url" method="post" id="urlForm">
+                    <div class="form-group">
+                        <label for="url">Enter your URL to shorten</label>
+                        <input 
+                            type="text"
+                            name="url"
+                            id="url"
+                            placeholder="https://www.example.com/some-very-long-url"
+                            required
+                        />
+                    </div>
+                    <button type="submit" id="generateBtn">Generate Short URL</button>
+                </form>
+                
+                <% if(locals.id) { %>
+                    <div class="result-container show" id="resultContainer">
+                        <p class="result-title">Your shortened URL is ready!</p>
+                        <p class="result-url" id="shortUrl">http://localhost:8001/url/<%= id %></p>
+                        <button class="copy-btn" id="copyBtn">Copy URL</button>
+                    </div>
+                <% } else { %>
+                    <div class="result-container" id="resultContainer">
+                        <p class="result-title">Your shortened URL will appear here</p>
+                        <p class="result-url" id="shortUrl"></p>
+                        <button class="copy-btn" id="copyBtn">Copy URL</button>
+                    </div>
+                <% } %>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <% if(urlCount <= 100){ %>
+                        <div class="stat-number"><%= urlCount %></div>
+                    <% }else{ %>
+                        <div class="stat-number">100+</div>
+                    <% } %>
+                    <div class="stat-label">Links Created</div>
+                </div>
+                <div class="stat-card">
+                    <% if(userCount <= 100){ %>
+                        <div class="stat-number"><%= userCount %></div>
+                    <% }else{ %>
+                        <div class="stat-number">100+</div>
+                    <% } %>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">Uptime</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Support</div>
+                </div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <h3>Smart Shortening</h3>
+                    <p>Create clean, memorable short URLs that are perfect for sharing across all platforms and marketing campaigns.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Real-time Analytics</h3>
+                    <p>Track clicks and user engagement with comprehensive analytics dashboard.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Secure & Reliable</h3>
+                    <p>Enterprise-grade security with 99.9% uptime guarantee. Your links are safe and always accessible.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="section" id="pricing">
+        <h2 class="section-title">Simple, Transparent Pricing</h2>
+        
+        <div class="pricing-cards">
+            <div class="pricing-card">
+                <div class="card-header text-center">
+                    <h4 class="my-0 fw-normal">Free</h4>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="card-title pricing-card-title">0 INR<small class="text-muted fw-light">/mo</small></h1>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li>5 Short URLs</li>
+                        <li>Basic Analytics</li>
+                        <li>Community Support</li>
+                    </ul>
+                    <% if(locals.userPlan === 'OWNER'){ %>
+                        <button class="w-100 btn btn-lg btn-primary" disabled> You are the Admin </button>
+                    <% }else{ %>
+                        <button class="w-100 btn btn-lg btn-secondary" disabled> Free Plan </button>
+                    <% } %>
+                </div>
+            </div>
+            
+            <div class="pricing-card">
+                <div class="card-header text-center">
+                    <h4 class="my-0 fw-normal">Core</h4>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="card-title pricing-card-title">50 INR<small class="text-muted fw-light">/mo</small></h1>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li>1000 Short URLs</li>
+                        <li>Core Analytics</li>
+                        <li>Priority Support</li>
+                    </ul>
+                    <% if (locals.userPlan === 'CORE') { %>
+                        <button class="w-100 btn btn-lg btn-primary" disabled> Current Plan </button>
+                    <% }else if(locals.userPlan === 'PREMIUM'){ %>
+                        <button class="w-100 btn btn-lg btn-primary" disabled> Included in Premium </button>
+                    <% }else if(locals.userPlan === 'OWNER'){ %>
+                        <button class="w-100 btn btn-lg btn-primary" disabled> You are the Admin </button>
+                    <% }else { %>
+                        <a href="/pricing?plan=PREMIUM" class="w-100 btn btn-lg btn-primary">Upgrade Now</a>
+                    <% } %>
+                </div>
+            </div>
+            
+            <div class="pricing-card border-primary">
+                <div class="card-header text-center text-white">
+                    <h4 class="my-0 fw-normal">Premium</h4>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="card-title pricing-card-title">100 INR<small class="text-muted fw-light">/mo</small></h1>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li>Unlimited URLs</li>
+                        <li>Advanced Analytics</li>
+                        <li>24/7 Support</li>
+                    </ul>
+                    <% if (locals.userPlan === 'PREMIUM') { %>
+                        <button class="w-100 btn btn-lg btn-primary" disabled> Current Plan </button>
+                    <% }else if(locals.userPlan === 'OWNER'){ %>
+                        <button class="w-100 btn btn-lg btn-primary" disabled> You are the Admin </button>
+                    <% }else { %>
+                        <a href="/pricing?plan=PREMIUM" class="w-100 btn btn-lg btn-primary">Upgrade Now</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        
+        <h3 class="text-center mb-4">Feature Comparison</h3>
+        <table class="comparison-table" style="opacity: 0;">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Free</th>
+                    <th>Core</th>
+                    <th>Premium</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Short URLs</td>
+                    <td>5</td>
+                    <td>1000</td>
+                    <td>Unlimited</td>
+                </tr>
+                <tr>
+                    <td>Link Analytics</td>
+                    <td>Basic</td>
+                    <td>Advanced</td>
+                    <td>Premium</td>
+                </tr>
+                <tr>
+                    <td>Custom Domains</td>
+                    <td class="feature-missing">-</td>
+                    <td class="feature-check">1</td>
+                    <td class="feature-check">Unlimited</td>
+                </tr>
+                <tr>
+                    <td>Clicks</td>
+                    <td class="feature-check" >100</td>
+                    <td class="feature-check">Unlimited</td>
+                    <td class="feature-check">Unlimited</td>
+                </tr>
+                <tr>
+                    <td>Bulk URL Shortening</td>
+                    <td class="feature-missing">-</td>
+                    <td class="feature-check">✓</td>
+                    <td class="feature-check">✓</td>
+                </tr>
+                <tr>
+                    <td>Support</td>
+                    <td>Community</td>
+                    <td>Priority</td>
+                    <td>24/7 Dedicated</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section" id="contact">
+        <h2 class="section-title">Contact Us</h2>
+        <div class="contact-form" style="opacity: 0;">
+            <form id="contactForm" onsubmit="handleFormSubmit(event)"> 
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="First Name" name="fname" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Last Name" name="lname" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="email" class="form-control" placeholder="Your Email Address" name="email" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="Subject" name="subject" required>
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" rows="5" placeholder="Your Message" name="message" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-3">Send Message</button>
+            </form>
+        </div>
+    </section>
+
+    <%- include('./components/footer.ejs') %>
+
+    <script>
+        //Contact Us
+        async function handleFormSubmit(event){
+            event.preventDefault(); 
+
+            const form = document.getElementById('contactForm');
+            const formData = new FormData(form);
+
+            const formObject = Object.fromEntries(formData.entries());
+            
+            try {
+                //Loading
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+
+                //console.log(JSON.stringify(formObject));
+                
+                const response = await fetch('/send-email', {
+                    method: 'POST',
+                    body: JSON.stringify(formObject),
+                    headers:{
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                console.log("mail response",response);
+                
+                if(response.ok){
+                    //Success
+                    await Swal.fire({
+                        title: 'Success!',
+                        text: result.message || 'Your message has been sent successfully!',
+                        icon: 'success',
+                        confirmButtonColor: '#4361ee'
+                    });
+
+                    //Reset form
+                    form.reset(); 
+                }else{
+                    throw new Error(result.error || 'Failed to send message');
+                }
+            }catch(error){
+                //Error
+                await Swal.fire({
+                    title: 'Error!',
+                    text: error.message,
+                    icon: 'error',
+                    confirmButtonColor: '#f72585'
+                });
+            } finally {
+                //Bring back the button state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Message';
+            }
+        
+        }
+        // Initialize Framer Motion
+        const { motion, AnimatePresence } = window.Motion;
+
+        // Loading screen
+        document.addEventListener('DOMContentLoaded', function() {
+            window.addEventListener('load', function() {
+                const loadingScreen = document.getElementById('loadingScreen');
+                
+                // Force show loading screen at start
+                loadingScreen.style.display = 'flex';
+                loadingScreen.style.opacity = '1';
+                
+                // Hide after delay
+                setTimeout(() => {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 500);
+                }, 1500);
+            });
+
+            // Profile dropdown toggle
+            const profileImg = document.getElementById('profileImg');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            profileImg.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('show');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+                dropdownMenu.classList.remove('show');
+            });
+
+            // Dark mode toggle
+            const themeToggle = document.getElementById('themeToggle');
+            themeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isDark);
+                themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon" style="color: black;"></i>';
+            });
+
+            // Check for saved theme preference
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+
+            // Improved scroll animations with IntersectionObserver
+            const animateElements = () => {
+                const elements = [
+                    document.querySelector('.url-container'),
+                    document.querySelector('.comparison-table'),
+                    document.querySelector('.contact-form')
+                ].filter(el => el); // Filter out null elements
+                
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.style.animation = 'fadeInUp 0.8s ease-out forwards';
+                            entry.target.style.opacity = '1';
+                            observer.unobserve(entry.target); // Stop observing after animation
+                        }
+                    });
+                }, {
+                    threshold: 0.1,
+                    rootMargin: '0px 0px -50px 0px'
+                });
+
+                elements.forEach(element => {
+                    if (element) {
+                        observer.observe(element);
+                    }
+                });
+            };
+
+            // Run once on load
+            animateElements();
+
+            // Copy functionality
+            const copyBtn = document.getElementById('copyBtn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function() {
+                    const shortUrl = document.getElementById('shortUrl').textContent;
+                    navigator.clipboard.writeText(shortUrl).then(() => {
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            copyBtn.textContent = 'Copy URL';
+                        }, 2000);
+                    });
+                });
+            }
+
+            // Form submission animation
+            const form = document.getElementById('urlForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const btn = document.getElementById('generateBtn');
+                    btn.textContent = 'Generating...';
+                    btn.style.background = 'linear-gradient(45deg, var(--primary-light), var(--primary))';
+                });
+            }
+        });
+    </script>
+
+    <% if(locals.showError) { %>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Limit Reached',
+                text: '<%= errorMessage %>',
+                confirmButtonColor: '#4361ee', // Match your theme
+                backdrop: `rgba(0,0,0,0.7)`
+            });
+        </script>
+    <% } %>
+</body>
+</html>

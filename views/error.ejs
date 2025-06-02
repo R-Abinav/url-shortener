@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Page</title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Pop up messages library -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --success: #4cc9f0;
+            --error: #f72585;
+            --bg-dark: #212121;
+            --card-dark: #1e1e1e;
+            --text-dark: #e0e0e0;
+            --border-dark: #333;
+            --input-dark: #2d2d2d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            position: relative;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body.dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        /* Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: var(--light);
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .navbar {
+            background-color: var(--bg-dark);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle {
+            padding: 16px 32px;
+            background: none !important;
+            border: 1px solid var(--light);
+            box-shadow: 1px 1px 3px rgb(202, 202, 202);
+            border-radius: 8px;
+        }
+
+        .dark-mode .theme-toggle {
+            color: white;
+            padding: 16px 32px;
+            background: none !important;
+            border: 1px solid var(--bg-dark);
+            box-shadow: 1px 1px 3px var(--card-dark);
+            border-radius: 8px;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2.5%);
+            box-shadow: 2px 2px 7px rgb(195, 195, 195);
+            transition: transform 0.3s ease;
+        }
+
+        .dark-mode .theme-toggle:hover {
+            transform: translateY(-2.5%);
+            box-shadow: 2px 2px 7px var(--card-dark);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .dark-mode .nav-link {
+            color: var(--text-dark);
+        }
+
+        /* Error Container */
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 100vh;
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .error-icon {
+            font-size: 6rem;
+            color: var(--error);
+            margin-bottom: 2rem;
+            animation: bounce 2s infinite;
+        }
+
+        .error-code {
+            font-size: 5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--error), #ff0a78);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .error-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+
+        .dark-mode .error-title {
+            color: var(--text-dark);
+        }
+
+        .error-message {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--dark);
+            opacity: 0.8;
+            max-width: 600px;
+        }
+
+        .dark-mode .error-message {
+            color: var(--text-dark);
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 0.8rem 1.8rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(67, 97, 238, 0.1);
+            transform: translateY(-2px);
+            color: var(--primary);
+        }
+
+        .dark-mode .btn-secondary {
+            color: var(--primary-light);
+            border-color: var(--primary-light);
+        }
+
+        .dark-mode .btn-secondary:hover {
+            background: rgba(67, 97, 238, 0.2);
+        }
+
+        /* Animations */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-30px);
+            }
+            60% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-details {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            text-align: left;
+            width: 100%;
+            max-width: 600px;
+            display: none;
+        }
+
+        .dark-mode .error-details {
+            background-color: var(--input-dark);
+            border: 1px solid var(--border-dark);
+        }
+
+        .error-details.show {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .error-details-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .dark-mode .error-details-title {
+            color: var(--text-dark);
+        }
+
+        .error-details-content {
+            font-family: monospace;
+            white-space: pre-wrap;
+            color: var(--dark);
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .dark-mode .error-details-content {
+            color: var(--text-dark);
+        }
+
+        .toggle-details {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            text-decoration: underline;
+            transition: color 0.2s ease;
+        }
+
+        .dark-mode .toggle-details {
+            color: var(--primary-light);
+        }
+
+        .toggle-details:hover {
+            color: var(--secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 4rem;
+            }
+            
+            .error-title {
+                font-size: 1.5rem;
+            }
+            
+            .error-message {
+                font-size: 1rem;
+            }
+            
+            .error-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn-primary, .btn-secondary {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .error-code {
+                font-size: 3rem;
+            }
+            
+            .error-icon {
+                font-size: 4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <img src="/images/logo.png" alt="Logo" class="logo" onclick="window.location.href='/'">
+        </div>
+        
+        <div class="nav-center">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon" style="color: black;"></i>
+            </button>
+        </div>
+        
+        <div class="nav-right">
+            <a class="nav-link" href="/#contact">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Error Container -->
+    <div class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <h1 class="error-code" id="errorCode">404</h1>
+        <h2 class="error-title" id="errorTitle">Page Not Found</h2>
+        <p class="error-message" id="errorMessage">
+            The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+        </p>
+        
+        <div class="error-actions">
+            <a href="/" class="btn-primary">Go to Homepage</a>
+            <a href="/#contact" class="btn-secondary">Contact Support</a>
+        </div>
+        
+        <% if (locals.errorDetails) { %>
+            <button class="toggle-details" id="toggleDetails">Show Error Details</button>
+            <div class="error-details" id="errorDetails">
+                <h4 class="error-details-title">Error Details</h4>
+                <div class="error-details-content"><%= errorDetails %></div>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon" style="color: black;"></i>';
+        });
+
+        // Check for saved theme preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+
+        // Toggle error details
+        const toggleDetails = document.getElementById('toggleDetails');
+        if (toggleDetails) {
+            toggleDetails.addEventListener('click', function() {
+                const details = document.getElementById('errorDetails');
+                details.classList.toggle('show');
+                toggleDetails.textContent = details.classList.contains('show') ? 
+                    'Hide Error Details' : 'Show Error Details';
+            });
+        }
+
+        // Check for error data passed from backend
+        document.addEventListener('DOMContentLoaded', function() {
+            // These values would be replaced by your backend templating
+            const errorCode = '<%= errorCode || "404" %>';
+            const errorTitle = '<%= errorTitle || "Page Not Found" %>';
+            const errorMessage = '<%= errorMessage || "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable." %>';
+            
+            // Update the page elements
+            if (errorCode) document.getElementById('errorCode').textContent = errorCode;
+            if (errorTitle) document.getElementById('errorTitle').textContent = errorTitle;
+            if (errorMessage) document.getElementById('errorMessage').textContent = errorMessage;
+            
+            // Change icon based on error type
+            const errorIcon = document.querySelector('.error-icon i');
+            if (errorCode === '404') {
+                errorIcon.className = 'fas fa-map-marker-alt';
+            } else if (errorCode === '403') {
+                errorIcon.className = 'fas fa-ban';
+            } else if (errorCode === '500') {
+                errorIcon.className = 'fas fa-server';
+            } else if (errorCode === '401') {
+                errorIcon.className = 'fas fa-lock';
+            }
+        });
+    </script>
+</body>
+</html>

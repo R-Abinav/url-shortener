@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Analytics | Bibi</title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --success: #4cc9f0;
+            --error: #f72585;
+            --bg-dark: #212121;
+            --card-dark: #1e1e1e;
+            --text-dark: #e0e0e0;
+            --border-dark: #333;
+            --input-dark: #2d2d2d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body.dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        /* Navbar styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: var(--light);
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .navbar {
+            background-color: var(--bg-dark);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle {
+            padding: 16px 32px;
+            background: none !important;
+            border: 1px solid var(--light);
+            box-shadow: 1px 1px 3px rgb(202, 202, 202);
+            border-radius: 8px;
+        }
+
+        .dark-mode .theme-toggle {
+            padding: 16px 32px;
+            background: none !important;
+            border: 1px solid var(--bg-dark);
+            box-shadow: 1px 1px 3px var(--card-dark);
+            border-radius: 8px;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2.5%);
+            box-shadow: 2px 2px 7px rgb(195, 195, 195);
+            transition: transform 0.3s ease;
+        }
+
+        .dark-mode .theme-toggle:hover {
+            transform: translateY(-2.5%);
+            box-shadow: 2px 2px 7px var(--card-dark);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .dark-mode .nav-link {
+            color: var(--text-dark);
+        }
+
+        .profile-container {
+            position: relative;
+        }
+
+        .profile-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: contain;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-img:hover {
+            transform: scale(1.1);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background-color: var(--light);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0;
+            width: 180px;
+            display: none;
+            z-index: 1001;
+            transform-origin: top right;
+        }
+
+        .dark-mode .dropdown-menu {
+            background-color: var(--card-dark);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            color: var(--dark);
+            text-decoration: none;
+            display: block;
+            transition: all 0.2s ease;
+        }
+
+        .dark-mode .dropdown-item {
+            color: var(--text-dark);
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+            padding-left: 1.2rem;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 0.25rem 0;
+        }
+
+        .dark-mode .dropdown-divider {
+            background-color: var(--border-dark);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--light);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .dark-mode .loading-screen {
+            background-color: var(--bg-dark);
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid var(--primary);
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: var(--dark);
+        }
+
+        .dark-mode .loading-text {
+            color: var(--text-dark);
+        }
+
+        /* Main Layout */
+        .admin-layout {
+            display: flex;
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Sidebar */
+        .profile-sidebar {
+            width: 280px;
+            background-color: var(--light);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            position: fixed;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .profile-sidebar {
+            background-color: var(--card-dark);
+            border-right: 1px solid var(--border-dark);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .sidebar-header {
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .sidebar-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1rem;
+        }
+
+        .sidebar-user h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-user p {
+            margin: 0.25rem 0 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .dark-mode .sidebar-user p {
+            color: #a0aec0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--dark);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .sidebar-link {
+            color: var(--text-dark);
+        }
+
+        .sidebar-link:hover, .sidebar-link.active {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+
+        .sidebar-link i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Admin Content */
+        .admin-main {
+            flex: 1;
+            padding: 3rem;
+            margin-left: 280px;
+        }
+
+        /* Admin Header */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .admin-title {
+            font-size: 2rem;
+            margin: 0;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background-color: var(--light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .dark-mode .stat-card {
+            background-color: var(--card-dark);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .dark-mode .stat-label {
+            color: #a0aec0;
+        }
+
+        /* User Management Card */
+        .admin-card {
+            background-color: var(--light);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .dark-mode .admin-card {
+            background-color: var(--card-dark);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .admin-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .search-container {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            background-color: var(--light);
+            color: var(--dark);
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .search-input {
+            background-color: var(--input-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+
+        /* User Table */
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .user-table th, .user-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .dark-mode .user-table th,
+        .dark-mode .user-table td {
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .user-table th {
+            background-color: rgba(67, 97, 238, 0.1);
+            font-weight: 600;
+        }
+
+        .dark-mode .user-table th {
+            background-color: rgba(67, 97, 238, 0.2);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ban-btn {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .ban-btn:hover {
+            background-color: #d3165e;
+        }
+
+        .suspend-btn {
+            background-color: #ffbe0b;
+            color: var(--dark);
+        }
+
+        .dark-mode .suspend-btn {
+            color: var(--text-dark);
+        }
+
+        .suspend-btn:hover {
+            background-color: #e6ac00;
+        }
+
+        .badge {
+            padding: 0.35rem 0.65rem;
+            border-radius: 50rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .bg-primary {
+            background-color: var(--primary) !important;
+        }
+
+        .bg-secondary {
+            background-color: #6c757d !important;
+        }
+
+        .bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .bg-danger {
+            background-color: var(--error) !important;
+        }
+
+        .bg-warning {
+            background-color: #ffc107 !important;
+            color: #212529 !important;
+        }
+
+        /* Orders Table */
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .orders-table th, .orders-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .dark-mode .orders-table th,
+        .dark-mode .orders-table td {
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .orders-table th {
+            background-color: rgba(67, 97, 238, 0.1);
+            font-weight: 600;
+        }
+
+        .dark-mode .orders-table th {
+            background-color: rgba(67, 97, 238, 0.2);
+        }
+
+        /* Swal => Suspension and Ban */
+        .swal2-select {
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+        background-color: white;
+        }
+
+        .swal2-textarea {
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+        min-height: 100px;
+        resize: vertical;
+        }
+
+        .swal2-textarea:focus {
+        outline: none;
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        /* User actions (Suspend and Ban button) */
+        .action-btn.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .suspend-btn.disabled {
+            background-color: #ffbe0b80 !important;
+        }
+
+        .ban-btn.disabled {
+            background-color: #f7258580 !important;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .admin-layout {
+                flex-direction: column;
+            }
+            
+            .profile-sidebar {
+                width: 100%;
+                position: static;
+                height: auto;
+                padding: 1.5rem;
+                border-right: none;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            }
+            
+            .admin-main {
+                margin-left: 0;
+                padding: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .search-container {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .user-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <div class="loading-text">Loading Admin Dashboard</div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <a href="/">
+                <img src="/images/logo.png" alt="Logo" class="logo">
+            </a>
+        </div>
+        
+        <div class="nav-center">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+        
+        <div class="nav-right">
+            <a href="/#pricing" class="nav-link">Pricing</a>
+            <a href="/#contact" class="nav-link">Contact</a>
+            
+            <div class="profile-container">
+                <img src="/images/default-profile.jpg" alt="Profile" class="profile-img" id="profileImg">
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="/profile" class="dropdown-item">Your Profile</a>
+                    <a href="/profile/analytics" class="dropdown-item">Your Analytics</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="/logout" class="dropdown-item">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="profile-sidebar">
+            <div class="sidebar-header">
+                <img src="/images/default-profile.jpg" alt="User" class="sidebar-avatar">
+                <div class="sidebar-user">
+                    <h3><%= user.name %></h3>
+                    <p>Admin</p>
+                </div>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="/profile" class="sidebar-link">
+                        <i class="fas fa-user"></i>
+                        Profile Overview
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="/profile/analytics" class="sidebar-link">
+                        <i class="fas fa-chart-line"></i>
+                        Link Analytics
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="/profile/billing" class="sidebar-link">
+                        <i class="fas fa-credit-card"></i>
+                        Billing
+                    </a>
+                </li>
+                <% if (user.role === 'ADMIN') { %>
+                    <li class="sidebar-item">
+                        <a href="/admin-analytics" class="sidebar-link active">
+                            <i class="fa-solid fa-user-tie"></i>
+                            Admin Dashboard
+                        </a>
+                    </li>
+                <% } %>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1 class="admin-title">Admin Dashboard</h1>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number"><%= userCount %></div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div class="stat-number"><%= premiumUsers %></div>
+                    <div class="stat-label">Premium Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <div class="stat-number"><%= urlCount %></div>
+                    <div class="stat-label">Total URLs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="stat-number">₹<%= totalRevenue %></div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+            </div>
+            
+            <!-- User Management Card -->
+            <div class="admin-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-users-cog"></i>
+                        User Management
+                    </h2>
+                    <div class="search-container">
+                        <input type="text" class="search-input" placeholder="Search users..." id="userSearch">
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Plan</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% userData.forEach(user => { %>
+                                <tr>
+                                    <td><%= user.name %></td>
+                                    <td><%= user.email %></td>
+                                    <td>
+                                        <span class="badge <%= user.plan.toLowerCase() === 'premium' ? 'bg-primary' : 'bg-secondary' %>">
+                                            <%= user.plan %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge <%= user.status === 'ACTIVE' ? 'bg-success' : 'bg-danger' %>">
+                                            <%= user.status %>
+                                        </span>
+                                    </td>
+                                    <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
+                                    <td class="user-actions">
+                                        <button 
+                                            class="action-btn suspend-btn <%= user.status === 'SUSPENDED' || user.status === 'BANNED' ? 'disabled' : '' %>"
+                                            onclick="<%= user.status !== 'SUSPENDED' && user.status !== 'BANNED' ? `suspendUser('${user._id}')` : 'return false' %>"
+                                            <%= user.status === 'SUSPENDED' || user.status === 'BANNED' ? 'disabled' : '' %>
+                                        >
+                                            <i class="fas fa-clock"></i> 
+                                            <%= user.status === 'SUSPENDED' ? 'Suspended' : 'Suspend' %>
+                                        </button>
+                                        <button 
+                                            class="action-btn ban-btn <%= user.status === 'BANNED' ? 'disabled' : '' %>"
+                                            onclick="<%= user.status !== 'BANNED' ? `banUser('${user._id}')` : 'return false' %>"
+                                            <%= user.status === 'BANNED' ? 'disabled' : '' %>
+                                        >
+                                            <i class="fas fa-ban"></i> 
+                                            <%= user.status === 'BANNED' ? 'Banned' : 'Ban' %>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Recent Orders Card -->
+            <div class="admin-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-receipt"></i>
+                        Recent Orders
+                    </h2>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>User</th>
+                                <th>Plan</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% orderData.forEach(order => { %>
+                                <tr>
+                                    <td><%= order.razorpay_order_id %></td>
+                                    <td><%= order.createdBy?.name || 'N/A' %></td>
+                                    <td><%= order.plan %></td>
+                                    <td>₹<%= order.amount %></td>
+                                    <td>
+                                        <span class="badge <%= order.status === 'paid' ? 'bg-success' : 'bg-warning' %>">
+                                            <%= order.status %>
+                                        </span>
+                                    </td>
+                                    <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <%- include('./components/footer.ejs') %>
+
+    <script>
+        // Simulate loading data from backend
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide loading screen after 1.5 seconds (simulating API call)
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                }, 500);
+            }, 1500);
+            
+            // Profile dropdown toggle
+            const profileImg = document.getElementById('profileImg');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            
+            profileImg.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('show');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+                if (dropdownMenu.classList.contains('show')) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+            
+            // Dark mode toggle
+            const themeToggle = document.getElementById('themeToggle');
+            themeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isDark);
+                
+                // Update icon
+                const icon = this.querySelector('i');
+                if (isDark) {
+                    icon.classList.replace('fa-moon', 'fa-sun');
+                    icon.style.color = 'white';
+                } else {
+                    icon.classList.replace('fa-sun', 'fa-moon');
+                    icon.style.color = 'black';
+                }
+            });
+            
+            // Check for saved theme preference
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+                const icon = document.querySelector('#themeToggle i');
+                icon.classList.replace('fa-moon', 'fa-sun');
+                icon.style.color = 'white';
+            }
+            
+            // Animation for cards
+            const animateCards = () => {
+                const cards = document.querySelectorAll('.stat-card, .admin-card');
+                
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.animation = `fadeInUp 0.5s ease-out ${index * 0.1}s forwards`;
+                        card.style.opacity = '0';
+                    }, 0);
+                });
+            };
+            
+            // Run animations after loading
+            setTimeout(animateCards, 1500);
+        });
+
+        // Admin functions
+        async function suspendUser(userId) {
+            //Optinal -> Extra protection
+            const userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
+            if (userRow && userRow.querySelector('.suspend-btn').classList.contains('disabled')) {
+                Swal.fire({
+                    title: 'Already Suspended',
+                    text: 'This user is already suspended',
+                    icon: 'info',
+                    confirmButtonColor: '#4361ee'
+                });
+                return;
+            }
+
+            const { value: formValues } = await Swal.fire({
+            title: 'Suspend User',
+            html:
+                '<div class="text-left mb-4">' +
+                '<label for="duration" class="block mb-2 font-medium">Duration</label>' +
+                '<select id="duration" class="swal2-select w-full mb-4">' +
+                '  <option value="1h">1 Hour</option>' +
+                '  <option value="1d">1 Day</option>' +
+                '  <option value="1w">1 Week</option>' +
+                '  <option value="1m">1 Month</option>' +
+                '</select>' +
+                '<label for="reason" class="block mb-2 font-medium">Reason</label>' +
+                '<textarea id="reason" class="swal2-textarea w-full" placeholder="Enter suspension reason..." required></textarea>' +
+                '</div>',
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Suspend',
+            confirmButtonColor: '#4361ee',
+            cancelButtonColor: '#f72585',
+            preConfirm: () => {
+                return {
+                duration: document.getElementById('duration').value,
+                reason: document.getElementById('reason').value.trim()
+                }
+            },
+            validationMessage: 'Reason is required',
+            didOpen: () => {
+                const reasonInput = document.getElementById('reason');
+                reasonInput.oninput = () => {
+                if (reasonInput.value.trim() === '') {
+                    Swal.getConfirmButton().disabled = true;
+                } else {
+                    Swal.getConfirmButton().disabled = false;
+                }
+                };
+            }
+            });
+
+            if (formValues) {
+                const { duration, reason } = formValues;
+                try {
+                    const response = await fetch(`/admin-analytics/suspend/${userId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            duration, 
+                            reason 
+                        }),
+                        redirect: 'manual'
+                    });
+                    if (response.type === 'opaqueredirect') {
+                        window.location.href = '/admin-analytics';
+                    }else{
+                        const result = await response.json();
+                        if (!response.ok) {
+                            throw new Error(result.error || 'Failed to suspend user');
+                        }
+                        window.location.reload(); // Fallback reload
+                    }
+
+                } catch (error) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: error.message,
+                        icon: 'error',
+                        confirmButtonColor: '#f72585'
+                    });
+                }
+            }
+        }
+
+        async function banUser(userId) {
+            //Optional extra protection!
+            const userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
+            if (userRow && userRow.querySelector('.ban-btn').classList.contains('disabled')) {
+                Swal.fire({
+                    title: 'Already Banned',
+                    text: 'This user is already banned',
+                    icon: 'info',
+                    confirmButtonColor: '#4361ee'
+                });
+                return;
+            }
+
+            const { value: formValues } = await Swal.fire({
+                title: 'Ban User',
+                html:
+                    '<div class="text-left mb-4">' +
+                    '<label for="reason" class="block mb-2 font-medium">Reason</label>' +
+                    '<textarea id="reason" class="swal2-textarea w-full" placeholder="Enter ban reason..." required></textarea>' +
+                    '</div>',
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Ban',
+                confirmButtonColor: '#4361ee',
+                cancelButtonColor: '#f72585',
+                preConfirm: () => {
+                    return {
+                        reason: document.getElementById('reason').value.trim()
+                    }
+                },
+                validationMessage: 'Reason is required',
+                didOpen: () => {
+                    const reasonInput = document.getElementById('reason');
+                    reasonInput.oninput = () => {
+                    if (reasonInput.value.trim() === '') {
+                        Swal.getConfirmButton().disabled = true;
+                    } else {
+                        Swal.getConfirmButton().disabled = false;
+                    }
+                    };
+                }
+            });
+
+            if(formValues){
+                try {
+                    const response = await fetch(`/admin-analytics/ban/${userId}`, {
+                        method: 'DELETE',
+                        body: JSON.stringify(formValues),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        redirect: 'manual'
+                    });
+
+                    //Check if response is a redirect
+                    if (response.type === 'opaqueredirect') {
+                        window.location.href = '/admin-analytics';
+                    }else{
+                        const result = await response.json();
+                        if (!response.ok) {
+                            throw new Error(result.error || 'Failed to ban user');
+                        }
+                        window.location.reload(); // Fallback reload
+                    }
+                }catch (error){
+                    Swal.fire({
+                        title: 'Error!',
+                        text: error.message,
+                        icon: 'error',
+                        confirmButtonColor: '#f72585'
+                    });
+                }
+            }
+        }
+
+        // Search functionality
+        document.getElementById('userSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('.user-table tbody tr');
+            
+            rows.forEach(row => {
+                const name = row.cells[0].textContent.toLowerCase();
+                const email = row.cells[1].textContent.toLowerCase();
+                
+                if (name.includes(searchTerm) || email.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

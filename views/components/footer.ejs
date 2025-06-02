@@ -1,0 +1,115 @@
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-content">
+            <div class="footer-left">
+                <h3 class="footer-copyright">Bibi Corp © <span id="current-year"></span></h3>
+            </div>
+            <div class="footer-right">
+                <h4 class="footer-credit">Made by Abinav</h4>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+    /* Footer Styles */
+    .footer {
+        width: 100%;
+        background-color: var(--light);
+        color: var(--dark);
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        margin-top: auto; /* Critical for sticky footer */
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 100;
+    }
+
+    .dark-mode .footer {
+        background-color: var(--bg-dark);
+        color: var(--text-dark);
+        border-top: 1px solid var(--border-dark);
+    }
+
+    .footer-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .footer-left, .footer-right {
+        display: flex;
+        align-items: center;
+    }
+
+    .footer-copyright {
+        font-size: 1rem;
+        font-weight: 500;
+        margin: 0;
+        color: var(--dark);
+    }
+
+    .dark-mode .footer-copyright {
+        color: var(--text-dark);
+    }
+
+    .footer-credit {
+        font-size: 0.9rem;
+        font-weight: 400;
+        margin: 0;
+        color: var(--dark);
+        opacity: 0.8;
+    }
+
+    .dark-mode .footer-credit {
+        color: var(--text-dark);
+    }
+
+    /* Critical for proper footer placement */
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .footer-container {
+            padding: 1.5rem;
+        }
+        
+        .footer-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.75rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .footer-container {
+            padding: 1rem;
+        }
+        
+        .footer-copyright {
+            font-size: 0.9rem;
+        }
+        
+        .footer-credit {
+            font-size: 0.8rem;
+        }
+    }
+</style>
+
+<script>
+    // Auto-update year - runs on all pages
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    });
+</script>
