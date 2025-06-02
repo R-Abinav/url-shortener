@@ -41,6 +41,10 @@ export function restrictTo(roles){
 }
 
 export async function checkUserStatus(req, res, next){
+    if (req.path === '/logout') {
+        return next();
+    }
+
     if (!req.user){
         return next();
     }

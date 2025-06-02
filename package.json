@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index"
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
@@ -21,8 +21,10 @@
     "mongoose": "^8.15.0",
     "nanoid": "^5.1.5",
     "nodemailer": "^7.0.3",
-    "nodemon": "^3.1.10",
     "razorpay": "^2.9.6",
     "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
