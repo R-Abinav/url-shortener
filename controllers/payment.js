@@ -40,6 +40,7 @@ export async function getPaymentPage(req, res){
             userName: user.name,
             userEmail: user.email,
             userContact: user.phone,
+            razorpay_key: process.env.RAZOR_TEST_KEY_ID
         });
 
     }catch(err){
