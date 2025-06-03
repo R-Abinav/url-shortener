@@ -39,6 +39,7 @@ connectMongoDB(mongoURL)
 })
 .catch((err) => {
     console.log("Error in connecting to MongoDB: ", err);
+    process.exit(1);
 });
 
 //View Engine

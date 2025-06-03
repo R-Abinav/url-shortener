@@ -826,7 +826,7 @@
                 <% if(locals.id) { %>
                     <div class="result-container show" id="resultContainer">
                         <p class="result-title">Your shortened URL is ready!</p>
-                        <p class="result-url" id="shortUrl">http://localhost:8001/url/<%= id %></p>
+                        <p class="result-url" id="shortUrl"><%= baseUrl %>/url/<%= id %></p>
                         <button class="copy-btn" id="copyBtn">Copy URL</button>
                     </div>
                 <% } else { %>

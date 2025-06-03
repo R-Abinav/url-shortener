@@ -64,6 +64,7 @@ export async function generateShortUrl(req, res) {
             userPlan: user.plan,
             urlCount: homePageUrlCount,
             userCount: userCount,
+            baseUrl: process.env.BASE_URL
         });
     } catch(err) {
         console.log(err);
