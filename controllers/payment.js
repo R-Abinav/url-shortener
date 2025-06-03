@@ -17,8 +17,8 @@ export async function getPaymentPage(req, res){
         }
 
         const pricing = {
-            CORE: 1500,
-            PREMIUM: 3999
+            CORE: 50,
+            PREMIUM: 100,
         };
 
         const user = req.user;
@@ -36,7 +36,10 @@ export async function getPaymentPage(req, res){
         return res.status(200).render('payment', {
             plan: plan,
             cost: pricing[plan],
-            user: user
+            user: user,
+            userName: user.name,
+            userEmail: user.email,
+            userContact: user.phone,
         });
 
     }catch(err){

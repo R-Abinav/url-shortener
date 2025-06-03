@@ -301,7 +301,7 @@ export async function getProfileAnalyticsPage(req, res) {
             userData: user,
             userPlan: user.plan,
             analyticsData: analyticsData,
-            baseUrl: `${req.protocol}://${req.get('host')}`
+            baseUrl: `${req.protocol}://${req.get('host')}/url`
         });
     } catch(err) {
         console.log("Error while fetching the urls! :", err);

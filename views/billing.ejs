@@ -722,6 +722,7 @@
                                 <div class="billing-detail-label">Receipt</div>
                                 <div class="billing-detail-value"><%= order.receipt %></div>
                             </div>
+                            <br />
                             <div class="billing-detail-item">
                                 <div class="billing-detail-label">Validity</div>
                                 <div class="billing-detail-value"><%= formattedExpiry %></div>
@@ -730,13 +731,6 @@
                                 <div class="billing-detail-label">Payment Method</div>
                                 <div class="billing-detail-value"><%= order.payment_method %></div>
                             </div>
-                        </div>
-                        
-                        <div class="billing-actions">
-                            <button class="btn-download">
-                                <i class="fas fa-download"></i>
-                                Download Invoice
-                            </button>
                         </div>
                     </div>
                 <% }) %>

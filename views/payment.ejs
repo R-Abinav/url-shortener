@@ -532,8 +532,8 @@
                 amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
                 currency,
                 name: "Bibi Corp", //your business name
-                description: "Test Transaction",
-                image: "https://example.com/your_logo",
+                description: `Payment for ${plan} plan membership`,
+                image: "",
                 order_id: orderDetails.order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
                 handler: async function (response){
                     const body = {
@@ -596,9 +596,9 @@
                     }
                 },
                 prefill: { //We recommend using the prefill parameter to auto-fill customer's contact information, especially their phone number
-                    name: "Piyush", //your customer's name
-                    email: "piyush@dev.com", 
-                    contact: "9858932551"  //Provide the customer's phone number for better conversion rates 
+                    name: "<%= userName %>", //your customer's name
+                    email: "<%= userEmail %>", 
+                    contact: "<%= userContact %>"  //Provide the customer's phone number for better conversion rates 
                 },
                 notes: {
                     address: "Razorpay Corporate Office"
