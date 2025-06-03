@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
 import { checkForAuthentication, checkUserStatus } from './middlewares/auth.js';
+import { handleUserLogOut } from './controllers/user.js';
 
 import urlRouter from './routes/url.js';
 import staticRouter from './routes/staticRouter.js';
@@ -53,6 +54,10 @@ app.use(cookieParser());
 app.use(express.json());  //For parsing json
 app.use(express.urlencoded({ extended: false })); //For parsing form data!
 app.use(checkForAuthentication); //Run this always!
+
+//logout route BEFORE checkUserStatus
+app.get('/logout', handleUserLogOut);
+
 app.use(checkUserStatus) //Checks if user is banned, suspended Or Active!
 
 //Routing

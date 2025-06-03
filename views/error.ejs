@@ -460,17 +460,14 @@
 
         // Check for error data passed from backend
         document.addEventListener('DOMContentLoaded', function() {
-            // These values would be replaced by your backend templating
-            const errorCode = '<%= errorCode || "404" %>';
-            const errorTitle = '<%= errorTitle || "Page Not Found" %>';
-            const errorMessage = '<%= errorMessage || "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable." %>';
+            const errorCode = '<%= typeof errorCode !== "undefined" ? errorCode : "404" %>';
+            const errorTitle = '<%= typeof errorTitle !== "undefined" ? errorTitle : "Page Not Found" %>';
+            const errorMessage = '<%= typeof errorMessage !== "undefined" ? errorMessage : "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable." %>';
             
-            // Update the page elements
             if (errorCode) document.getElementById('errorCode').textContent = errorCode;
             if (errorTitle) document.getElementById('errorTitle').textContent = errorTitle;
             if (errorMessage) document.getElementById('errorMessage').textContent = errorMessage;
             
-            // Change icon based on error type
             const errorIcon = document.querySelector('.error-icon i');
             if (errorCode === '404') {
                 errorIcon.className = 'fas fa-map-marker-alt';

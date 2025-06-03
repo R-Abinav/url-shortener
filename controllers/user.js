@@ -305,7 +305,9 @@ export async function getProfileAnalyticsPage(req, res) {
         });
     } catch(err) {
         console.log("Error while fetching the urls! :", err);
-        return res.status(500).render('server_error');
+        return res.status(500).render('server_error', {
+            error: err.message,
+        });
     }
 }
 
@@ -353,7 +355,9 @@ export async function handleUserSignUp(req, res) {
         }
         
         //For all other errors, return server error
-        return res.status(500).render('server_error');
+        return res.status(500).render('server_error', {
+            error: err.message,
+        });
     }
 }
 
@@ -378,13 +382,32 @@ export async function handleUserLogin(req, res) {
 
     } catch(err) {
         console.log(err);
-        return res.status(500).render('server_error');
+        return res.status(500).render('server_error', {
+            error: err.message,
+        });
     }
 }
 
 export async function handleUserLogOut(req, res) {
-    res.cookie('token', '', { maxAge: 1 });
-    return res.status(302).redirect("/login");
+    try{
+        res.clearCookie('token', {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: process.env.NODE_ENV === 'production',
+            path: '/'
+        });
+        
+        if (req.session) {
+            req.session.destroy();
+        }
+        
+        res.set('Cache-Control', 'no-store');
+        
+        return res.redirect('/login');
+    }catch(err){
+        console.error('Logout error:', err);
+        return res.status(500).redirect('/login?error=logout_failed');
+    }
 }
 
 export async function handleDeleteAccount(req, res) {
@@ -419,7 +442,7 @@ export async function handleDeleteAccount(req, res) {
             });
         }
     } catch(err) {
-        return res.status(500).json({ 
+        return res.status(500).render('server_error',{ 
             error: "Internal server error" 
         });
     }
@@ -469,7 +492,7 @@ export async function handleEmailSending(req, res) {
         });
     } catch(err) {
         console.log(err);
-        return res.status(500).json({
+        return res.status(500).render('server_error',{
             error: "Internal server error"
         });
     }

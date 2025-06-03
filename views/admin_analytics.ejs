@@ -649,6 +649,106 @@
             background-color: #f7258580 !important;
         }
 
+        /* SweetAlert2 Custom Theme */
+        .swal2-theme-custom {
+            background-color: var(--light) !important;
+            color: var(--dark) !important;
+            border-radius: 12px !important;
+            padding: 1.5rem !important;
+        }
+
+        .dark-mode .swal2-theme-custom {
+            background-color: var(--bg-dark) !important;
+            color: var(--text-dark) !important;
+        }
+
+        .swal2-form-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .swal2-form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .swal2-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+            text-align: left;
+            padding-left: 4px;
+        }
+
+        .dark-mode .swal2-label {
+            color: var(--text-dark);
+        }
+
+        .swal2-input-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .swal2-select {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: white;
+            color: var(--dark);
+            font-family: 'Inter', sans-serif;
+            margin: 0 auto;
+        }
+
+        .dark-mode .swal2-select {
+            background-color: var(--input-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+
+        .swal2-textarea {
+            width: 100%;
+            max-width: 400px;
+            min-height: 100px;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: white;
+            color: var(--dark);
+            font-family: 'Inter', sans-serif;
+            resize: vertical;
+            margin: 0 auto;
+        }
+
+        .dark-mode .swal2-textarea {
+            background-color: var(--input-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark);
+        }
+
+        /* Button styling remains the same */
+        .swal2-confirm {
+            background-color: var(--primary) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .swal2-confirm:hover {
+            background-color: var(--secondary) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .swal2-cancel {
+            transition: all 0.3s ease !important;
+        }
+
+        .swal2-cancel:hover {
+            transform: translateY(-2px) !important;
+        }   
+
         /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -1025,42 +1125,48 @@
             }
 
             const { value: formValues } = await Swal.fire({
-            title: 'Suspend User',
-            html:
-                '<div class="text-left mb-4">' +
-                '<label for="duration" class="block mb-2 font-medium">Duration</label>' +
-                '<select id="duration" class="swal2-select w-full mb-4">' +
-                '  <option value="1h">1 Hour</option>' +
-                '  <option value="1d">1 Day</option>' +
-                '  <option value="1w">1 Week</option>' +
-                '  <option value="1m">1 Month</option>' +
-                '</select>' +
-                '<label for="reason" class="block mb-2 font-medium">Reason</label>' +
-                '<textarea id="reason" class="swal2-textarea w-full" placeholder="Enter suspension reason..." required></textarea>' +
-                '</div>',
-            focusConfirm: false,
-            showCancelButton: true,
-            confirmButtonText: 'Suspend',
-            confirmButtonColor: '#4361ee',
-            cancelButtonColor: '#f72585',
-            preConfirm: () => {
-                return {
-                duration: document.getElementById('duration').value,
-                reason: document.getElementById('reason').value.trim()
+                title: 'Suspend User',
+                html: `
+                    <div class="swal2-form-container">
+                        <div class="swal2-form-group">
+                            <label for="duration" class="swal2-label">Duration</label>
+                            <select id="duration" class="swal2-select">
+                                <option value="1h">1 Hour</option>
+                                <option value="1d">1 Day</option>
+                                <option value="1w">1 Week</option>
+                                <option value="1m">1 Month</option>
+                            </select>
+                        </div>
+                        <div class="swal2-form-group">
+                            <label for="reason" class="swal2-label">Reason</label>
+                            <textarea id="reason" class="swal2-textarea" placeholder="Enter suspension reason..." required></textarea>
+                        </div>
+                    </div>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Suspend',
+                confirmButtonColor: '#4361ee',
+                cancelButtonColor: '#f72585',
+                customClass: {
+                    popup: 'swal2-theme-custom',
+                    input: 'swal2-input-custom',
+                    textarea: 'swal2-textarea-custom'
+                },
+                preConfirm: () => {
+                    return {
+                        duration: document.getElementById('duration').value,
+                        reason: document.getElementById('reason').value.trim()
+                    }
+                },
+                validationMessage: 'Reason is required',
+                didOpen: () => {
+                    const reasonInput = document.getElementById('reason');
+                    reasonInput.oninput = () => {
+                        Swal.getConfirmButton().disabled = reasonInput.value.trim() === '';
+                    };
                 }
-            },
-            validationMessage: 'Reason is required',
-            didOpen: () => {
-                const reasonInput = document.getElementById('reason');
-                reasonInput.oninput = () => {
-                if (reasonInput.value.trim() === '') {
-                    Swal.getConfirmButton().disabled = true;
-                } else {
-                    Swal.getConfirmButton().disabled = false;
-                }
-                };
-            }
-            });
+            }); 
 
             if (formValues) {
                 const { duration, reason } = formValues;
@@ -1112,16 +1218,24 @@
 
             const { value: formValues } = await Swal.fire({
                 title: 'Ban User',
-                html:
-                    '<div class="text-left mb-4">' +
-                    '<label for="reason" class="block mb-2 font-medium">Reason</label>' +
-                    '<textarea id="reason" class="swal2-textarea w-full" placeholder="Enter ban reason..." required></textarea>' +
-                    '</div>',
+                html: `
+                    <div class="swal2-form-container">
+                        <div class="swal2-form-group">
+                            <label for="reason" class="swal2-label">Reason</label>
+                            <textarea id="reason" class="swal2-textarea" placeholder="Enter ban reason..." required></textarea>
+                        </div>
+                    </div>
+                `,
                 focusConfirm: false,
                 showCancelButton: true,
                 confirmButtonText: 'Ban',
                 confirmButtonColor: '#4361ee',
                 cancelButtonColor: '#f72585',
+                customClass: {
+                    popup: 'swal2-theme-custom',
+                    input: 'swal2-input-custom',
+                    textarea: 'swal2-textarea-custom'
+                },
                 preConfirm: () => {
                     return {
                         reason: document.getElementById('reason').value.trim()
@@ -1131,11 +1245,7 @@
                 didOpen: () => {
                     const reasonInput = document.getElementById('reason');
                     reasonInput.oninput = () => {
-                    if (reasonInput.value.trim() === '') {
-                        Swal.getConfirmButton().disabled = true;
-                    } else {
-                        Swal.getConfirmButton().disabled = false;
-                    }
+                        Swal.getConfirmButton().disabled = reasonInput.value.trim() === '';
                     };
                 }
             });
