@@ -17,6 +17,7 @@
       }
     ],
     "env": {
-      "NODE_ENV": "production"
+      "NODE_ENV": "production",
+      "BASE_URL": "https://$VERCEL_URL"
     }
-  }
+}
