@@ -120,6 +120,9 @@ Create a `.env` file in the root directory:
 #PORT
 PORT=your_desired_port_number
 
+#Auth
+SALT_ROUNDS=desired_salt_rounds
+
 # Database
 MONGO_URL=your_mongodb_connection_string
 
