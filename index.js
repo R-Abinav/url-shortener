@@ -8,6 +8,8 @@ import cors from 'cors';
 import { checkForAuthentication, checkUserStatus } from './middlewares/auth.js';
 import { handleUserLogOut } from './controllers/user.js';
 
+import helmet from 'helmet';
+
 import urlRouter from './routes/url.js';
 import staticRouter from './routes/staticRouter.js';
 import userRouter from './routes/user.js';
@@ -49,7 +51,8 @@ app.set("views", path.resolve("./views"));
 //Expose the public folder
 app.use(express.static('public'));
 
-//Middleware
+//app.use(helmet()) //Safer headers;
+
 app.use(cors());
 app.use(cookieParser());
 app.use(express.json());  //For parsing json
@@ -67,7 +70,6 @@ app.use("/" ,userRouter);
 app.use("/pricing", paymentRouter);
 app.use("/url",urlRouter);
 app.use("/admin-analytics", adminRouter);
-
 
 app.listen(PORT, () => {
     console.log(`Server has started on PORT: ${PORT}`);

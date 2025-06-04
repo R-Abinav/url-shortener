@@ -1,6 +1,9 @@
 #Ignore the to_do.txt
 to_do.txt
 
+#Ignore the mongo backup
+mongo-backup/
+
 # Node modules
 node_modules/
 

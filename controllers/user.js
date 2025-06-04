@@ -2,6 +2,8 @@ import User from "../models/user.js";
 import URL from "../models/url.js";
 import Order from "../models/order.js";
 
+import bcrypt, { genSalt } from 'bcrypt';
+
 import { setUser } from "../service/auth.js";
 
 import { v4 as uuidv4 } from 'uuid';
@@ -323,10 +325,16 @@ export async function handleUserSignUp(req, res) {
     }
 
     try {
+        const saltRounds = Number(process.env.SALT_ROUNDS);
+        console.log(typeof(saltRounds));
+
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         await User.create({
             name,
             email, 
-            password,
+            password: hashedPassword,
             phone,
             address: {
                 street,
@@ -348,8 +356,7 @@ export async function handleUserSignUp(req, res) {
         //Check for duplicate key error (MongoDB error code 11000)
         if (err.code === 11000) {
             const duplicateField = Object.keys(err.keyPattern)[0];
-            return res.status(409).json({
-                success: false,
+            return res.status(409).render('signup',{
                 error: `There already exists a ${duplicateField} in our database. Please choose something else.`
             });
         }
@@ -364,25 +371,35 @@ export async function handleUserSignUp(req, res) {
 export async function handleUserLogin(req, res) {
     try {
         const { email, password } = req.body;
+        console.log(email);
 
         const user = await User.findOne({
-            email,
-            password,
+            email: email.toLowerCase().trim(),
         });
 
+        console.log(user);
+
         if(!user) {
-            return res.status(401).render('login', {
-                error: "Invalid Username or Password!"
+            return res.status(400).render('login', {
+                error: "Email not found!"
             });
         }
 
-        const token = setUser(user);
-        res.cookie('token', token);
-        return res.status(200).redirect("/");
+        const isMatch = await bcrypt.compare(password, user.password);
 
-    } catch(err) {
+        if(isMatch){
+            const token = setUser(user);
+            res.cookie('token', token);
+            return res.status(200).redirect("/");
+        }
+
+        return res.status(400).render('login', {
+            error: "Incorrect password! Please retry!",
+        });
+
+    }catch(err){
         console.log(err);
-        return res.status(500).render('server_error', {
+        return res.status(500).render('login', {
             error: err.message,
         });
     }
