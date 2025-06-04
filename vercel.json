@@ -4,8 +4,11 @@
       {
         "src": "index.js",
         "use": "@vercel/node",
-        "config": { 
-          "includeFiles": ["views/**", "public/**"]
+        "config": {
+          "includeFiles": [
+            "views/**",
+            "public/**"
+          ]
         }
       }
     ],
