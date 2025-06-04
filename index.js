@@ -76,36 +76,6 @@ app.use("/pricing", paymentRouter);
 app.use("/url",urlRouter);
 app.use("/admin-analytics", adminRouter);
 
-//Vercel-compatible server setup
-const startServer = async () => {
-  try{
-    const PORT = process.env.PORT || 8001;
-    const mongoURL = process.env.MONGO_URL;
-    
-    if (!mongoURL) {
-      throw new Error("MONGO_URL is not defined");
-    }
-
-    await connectMongoDB(mongoURL);
-    console.log("MongoDB Connected!");
-
-    return app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  }catch(err){
-    console.error("Server failed to start:", err);
-    process.exit(1);
-  }
-};
-
-//Export for Vercel serverless
-module.exports = startServer().then(server => {
-  const handler = app;
-  handler.server = server; 
-  return handler;
+app.listen(PORT, () => {
+    console.log(`Server is running on PORT: ${PORT}`);
 });
-
-//For local development
-if (process.env.NODE_ENV !== 'production') {
-  startServer();
-}
